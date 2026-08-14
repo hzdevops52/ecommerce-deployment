@@ -22,15 +22,15 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
-            steps {
-                sh 'docker build -t ghcr.io/hzdevops52/e-frontend:${env.COMMIT_SHA} ./frontend'
-                sh 'docker tag ghcr.io/hzdevops52/e-frontend:${env.COMMIT_SHA} ghcr.io/hzdevops52/e-frontend:test'
+    stage('Docker Build') {
+    steps {
+        sh 'docker build -t ghcr.io/hzdevops52/e-frontend:$COMMIT_SHA ./frontend'
+        sh 'docker tag ghcr.io/hzdevops52/e-frontend:$COMMIT_SHA ghcr.io/hzdevops52/e-frontend:test'
 
-                sh 'docker build -t ghcr.io/hzdevops52/e-backend:${env.COMMIT_SHA} ./backend'
-                sh 'docker tag ghcr.io/hzdevops52/e-backend:${env.COMMIT_SHA} ghcr.io/hzdevops52/e-backend:test'
-            }
-        }
+        sh 'docker build -t ghcr.io/hzdevops52/e-backend:$COMMIT_SHA ./backend'
+        sh 'docker tag ghcr.io/hzdevops52/e-backend:$COMMIT_SHA ghcr.io/hzdevops52/e-backend:test'
+    }
+}
 
         stage('Docker Push') {
             steps {
