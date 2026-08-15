@@ -55,5 +55,28 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy') {
+    steps {
+        withCredentials([
+            file(
+                credentialsId: 'backend-env',
+                variable: 'BACKEND_ENV'
+            ),
+            usernamePassword(
+                credentialsId: 'GHCR-push',
+                usernameVariable: 'GHCR_USER',
+                passwordVariable: 'GHCR_TOKEN'
+            )
+        ]){
+            sh '''
+                cp "$BACKEND_ENV" backend/.env
+
+                docker compose pull
+                docker compose up -d
+            '''
+        }
+    }
+}
     }
 }
