@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: backend-deployment
+  namespace: ecommerce
+
+spec:
+  replicas: 1
+    
+  selector:
+    matchLabels:
+      app: backend-deployment
+  template:
+    metadata:
+      labels:
+        app: backend-deployment
+
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+        
+      containers:
+        - name: backend
+          image: ghcr.io/hzdevops52/e-backend:test
+
+          ports:
+            - containerPort: 5000
+
+          envFrom:
+            - configMapRef:
+                name: backend-configmap
+
+            - secretRef:
+                name: backend-secret

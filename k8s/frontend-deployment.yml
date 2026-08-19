@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: frontend-deployment
+  namespace: ecommerce
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: frontend-deployment
+
+  template:
+    metadata:
+      labels:
+        app: frontend-deployment
+
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+        
+      containers:
+        - name: frontend
+          image: ghcr.io/hzdevops52/e-frontend:test 
+          
+          ports:
+            - containerPort: 80
