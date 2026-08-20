@@ -7,7 +7,6 @@ spec:
   type: ClusterIP
   selector:
     app: mongodb
-    namespace: ecommerce
   ports:
   - port: 27017
     targetPort: 27017
