@@ -7,10 +7,11 @@ metadata:
 
 spec:
   replicas: 1
-    
+
   selector:
     matchLabels:
       app: backend-deployment
+
   template:
     metadata:
       labels:
@@ -19,13 +20,15 @@ spec:
     spec:
       imagePullSecrets:
         - name: ghcr-secret
-        
+
       containers:
         - name: backend
           image: ghcr.io/hzdevops52/e-backend:test
 
           ports:
-            - containerPort: 5000
+            - name: http
+              containerPort: 5000
+              protocol: TCP
 
           envFrom:
             - configMapRef:
@@ -45,10 +48,17 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 5000
-            initialDelaySeconds: 10
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
           readinessProbe:
             httpGet:
               path: /health
-              port: 5000
+              port: http
             initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
