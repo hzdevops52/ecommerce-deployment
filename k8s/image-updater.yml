@@ -1,0 +1,44 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+
+metadata:
+  name: ecommerce-image-updater
+  namespace: argocd
+
+spec:
+  applicationRefs:
+    - namePattern: "ecommerce"
+
+      images:
+        - alias: backend
+          imageName: ghcr.io/hzdevops52/e-backend:test
+
+          commonUpdateSettings:
+            updateStrategy: newest-build
+            allowTags: "regexp:^[0-9a-f]{7,40}$"
+            pullSecret: pullsecret:argocd/argocd-image-updater-secret
+
+          manifestTargets:
+            helm:
+              name: backend.image.repository
+              tag: backend.image.tag
+
+        - alias: frontend
+          imageName: ghcr.io/hzdevops52/e-frontend:test
+
+          commonUpdateSettings:
+            updateStrategy: newest-build
+            allowTags: "regexp:^[0-9a-f]{7,40}$"
+            pullSecret: pullsecret:argocd/argocd-image-updater-secret
+
+          manifestTargets:
+            helm:
+              name: frontend.image.repository
+              tag: frontend.image.tag
+
+      writeBackConfig:
+        method: git
+        gitConfig:
+          repository: https://github.com/hzdevops52/ecommerce-deployment.git
+          branch: feature/hzdevops
+          writeBackTarget: helmvalues:./values.yaml
