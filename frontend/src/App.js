@@ -7,27 +7,46 @@ import Cart from "./Components/Cart"
 import Result from "./Components/Results"
 import AlertWrapper from "./Components/AlertWrapper"
 import Detail from "./Components/ProductInfo"
+
 export default function App(){
     return (
         <div className="overflow-y-hidden h-[100vh]">
             <AlertWrapper />
-            <div className="sticky top-0 z-100 h-[60px] p-5 w-full bg-black text-white flex justify-around">
+
+            <div className="sticky top-0 z-100 h-[60px] px-8 w-full bg-black/90 backdrop-blur-md text-white flex items-center justify-between shadow-lg border-b border-white/10">
+
                 <Link to="/">
-                    <button className="">Home</button>
+                    <button className="px-5 py-2 rounded-lg font-semibold tracking-wide hover:bg-white/10 transition duration-200">
+                        Home
+                    </button>
                 </Link>
+
                 <Link to="/auth">
-                    <button>Sign Up</button>
+                    <button className="px-5 py-2 rounded-lg font-semibold tracking-wide hover:bg-white/10 transition duration-200">
+                        Sign Up
+                    </button>
                 </Link>
+
                 <Link to="/verify">
-                    <button>Log In</button>
+                    <button className="px-5 py-2 rounded-lg font-semibold tracking-wide hover:bg-white/10 transition duration-200">
+                        Log In
+                    </button>
                 </Link>
+
                 <Link to="/products">
-                    <button>Add Product</button>
+                    <button className="px-5 py-2 rounded-lg font-semibold tracking-wide hover:bg-white/10 transition duration-200">
+                        Add Product
+                    </button>
                 </Link>
+
                 <Link to="/cart">
-                    <button>Cart</button>
+                    <button className="px-5 py-2 rounded-lg font-semibold tracking-wide hover:bg-white/10 transition duration-200">
+                        Cart
+                    </button>
                 </Link>
+
             </div>
+
             <Routes>
                 <Route path="/auth" element={<Register/>}/>
                 <Route path="/verify" element={<Authorize/>}/>
