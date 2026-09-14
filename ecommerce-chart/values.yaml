@@ -22,7 +22,7 @@ backend:
 frontend:
   image:
     repository: ghcr.io/hzdevops52/e-frontend
-    tag: f1d66d8
+    tag: e2de516
 
   replicaCount: 1
 
