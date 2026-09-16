@@ -7,10 +7,13 @@ metadata:
 
 spec:
   type: {{ .Values.frontend.service.type }}
+
   selector:
     app: frontend-deployment
 
   ports:
     - port: {{ .Values.frontend.service.port }}
       targetPort: {{ .Values.frontend.service.targetPort }}
+      {{- if eq .Values.frontend.service.type "NodePort" }}
       nodePort: {{ .Values.frontend.service.nodePort }}
+      {{- end }}
