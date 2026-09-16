@@ -314,6 +314,46 @@ unset APP_PASSWORD
 unset JWT_SECRET
 
 # ---------------------------------------------------------------------------
+# Blue/Green namespaces and secrets
+# ---------------------------------------------------------------------------
+for BLUE_GREEN_NS in ecommerce-blue ecommerce-green; do
+
+    runuser -l ec2-user -c \
+        "kubectl create namespace $BLUE_GREEN_NS \
+         --dry-run=client -o yaml \
+         | kubectl apply -f -"
+
+    runuser -l ec2-user -c \
+        "kubectl get secret ghcr-secret \
+         -n $NS \
+         -o json \
+        | jq 'del(
+            .metadata.namespace,
+            .metadata.resourceVersion,
+            .metadata.uid,
+            .metadata.creationTimestamp,
+            .metadata.managedFields
+          )' \
+        | jq --arg ns '$BLUE_GREEN_NS' '.metadata.namespace = \$ns' \
+        | kubectl apply -f -"
+
+    runuser -l ec2-user -c \
+        "kubectl get secret backend-secret \
+         -n $NS \
+         -o json \
+        | jq 'del(
+            .metadata.namespace,
+            .metadata.resourceVersion,
+            .metadata.uid,
+            .metadata.creationTimestamp,
+            .metadata.managedFields
+          )' \
+        | jq --arg ns '$BLUE_GREEN_NS' '.metadata.namespace = \$ns' \
+        | kubectl apply -f -"
+
+done
+
+# ---------------------------------------------------------------------------
 # Validate Helm chart
 # ---------------------------------------------------------------------------
 CHART="$REPO_DIR/ecommerce-chart"
