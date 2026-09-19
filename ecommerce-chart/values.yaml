@@ -1,0 +1,93 @@
+backend:
+  existingSecret: backend-secret
+  image:
+    repository: ghcr.io/hzdevops52/e-backend
+    tag: f1d66d8
+
+  replicaCount: 2
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+  service:
+    type: ClusterIP
+    port: 5000
+    targetPort: 5000
+
+frontend:
+  image:
+    repository: ghcr.io/hzdevops52/e-frontend
+    tag: e65a477
+
+  replicaCount: 1
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 80Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi
+
+  service:
+    type: NodePort
+    port: 80
+    targetPort: 80
+    nodePort: 30081
+
+mongodb:
+  image:
+    repository: mongo
+    tag: "6"
+
+  replicaCount: 1
+
+  service:
+    type: ClusterIP
+    port: 27017
+    targetPort: 27017
+
+  persistence:
+    enabled: false
+    size: 1Gi
+    volumeMode: Filesystem
+    accessModes:
+      - ReadWriteOnce
+
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+
+ingress:
+  enabled: false
+  className: nginx
+
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+
+  paths:
+    - path: /api
+      pathType: Prefix
+      service:
+        name: backend-service
+        port: 5000
+
+    - path: /
+      pathType: Prefix
+      service:
+        name: frontend-service
+        port: 80
