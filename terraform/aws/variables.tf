@@ -36,3 +36,9 @@ variable "backend_jwt_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "backend_email" {
+  description = "Email address used by the backend mail service"
+  type        = string
+  sensitive   = true
+}
