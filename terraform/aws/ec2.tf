@@ -20,8 +20,8 @@ resource "aws_instance" "private" {
   associate_public_ip_address = false
 
   root_block_device {
-    volume_size = 16
-    volume_type = "gp3"
+    volume_size           = 16
+    volume_type           = "gp3"
     delete_on_termination = true
   }
 

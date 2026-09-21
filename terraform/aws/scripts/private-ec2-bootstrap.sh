@@ -64,6 +64,67 @@ if ! command -v aws >/dev/null 2>&1; then
 fi
 
 # ---------------------------------------------------------------------------
+# CloudWatch Agent
+# ---------------------------------------------------------------------------
+echo "Installing Amazon CloudWatch Agent..."
+
+dnf install -y amazon-cloudwatch-agent
+
+cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<'EOF'
+{
+  "agent": {
+    "metrics_collection_interval": 60,
+    "run_as_user": "root"
+  },
+  "metrics": {
+    "namespace": "Ecommerce/EC2",
+    "metrics_collected": {
+      "mem": {
+        "measurement": [
+          "mem_used_percent"
+        ],
+        "metrics_collection_interval": 60
+      },
+      "disk": {
+        "measurement": [
+          "used_percent"
+        ],
+        "resources": [
+          "/"
+        ],
+        "metrics_collection_interval": 60
+      },
+      "swap": {
+        "measurement": [
+          "swap_used_percent"
+        ],
+        "metrics_collection_interval": 60
+      }
+    }
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/messages",
+            "log_group_name": "/ecommerce/ec2",
+            "log_stream_name": "{instance_id}"
+          }
+        ]
+      }
+    }
+  }
+}
+EOF
+
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+  -a fetch-config \
+  -m ec2 \
+  -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
+  -s
+
+# ---------------------------------------------------------------------------
 # Docker
 # ---------------------------------------------------------------------------
 if ! command -v docker >/dev/null 2>&1; then
@@ -312,6 +373,46 @@ rm -f "$SECRET_FILE"
 
 unset APP_PASSWORD
 unset JWT_SECRET
+
+# ---------------------------------------------------------------------------
+# Blue/Green namespaces and secrets
+# ---------------------------------------------------------------------------
+for BLUE_GREEN_NS in ecommerce-blue ecommerce-green; do
+
+    runuser -l ec2-user -c \
+        "kubectl create namespace $BLUE_GREEN_NS \
+         --dry-run=client -o yaml \
+         | kubectl apply -f -"
+
+    runuser -l ec2-user -c \
+        "kubectl get secret ghcr-secret \
+         -n $NS \
+         -o json \
+        | jq 'del(
+            .metadata.namespace,
+            .metadata.resourceVersion,
+            .metadata.uid,
+            .metadata.creationTimestamp,
+            .metadata.managedFields
+          )' \
+        | jq --arg ns '$BLUE_GREEN_NS' '.metadata.namespace = \$ns' \
+        | kubectl apply -f -"
+
+    runuser -l ec2-user -c \
+        "kubectl get secret backend-secret \
+         -n $NS \
+         -o json \
+        | jq 'del(
+            .metadata.namespace,
+            .metadata.resourceVersion,
+            .metadata.uid,
+            .metadata.creationTimestamp,
+            .metadata.managedFields
+          )' \
+        | jq --arg ns '$BLUE_GREEN_NS' '.metadata.namespace = \$ns' \
+        | kubectl apply -f -"
+
+done
 
 # ---------------------------------------------------------------------------
 # Validate Helm chart

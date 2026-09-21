@@ -1,9 +1,7 @@
-node_modules
+node_modules/
 
 .env
-
 images.env
-
 backend-secret.yml
 
 frontend/build/
@@ -12,4 +10,5 @@ frontend/build/
 **/.terraform/
 **/*.tfstate
 **/*.tfstate.*
+**/*.tfvars
 **/*.pem
