@@ -71,12 +71,11 @@ app.post("/signup", [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-        res.status(400).json({ 
+        return res.status(400).json({ 
             errors: errors.array() 
         })
     }
     await signup(req, res)
-    await mail(req, res)
 })
 app.post("/oauth", async (req, res) => {
     await oauth(req, res)
@@ -89,7 +88,7 @@ app.post("/login", [
 ],async (req, res) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-        res.status(400).json({
+        return res.status(400).json({
             errors: errors.array()
         })
     }

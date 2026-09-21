@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: backend-deployment
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: backend-deployment
+
+  template:
+    metadata:
+      labels:
+        app: backend-deployment
+
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+
+      containers:
+        - name: backend
+          image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}
+
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+
+          envFrom:
+            - configMapRef:
+                name: backend-configmap
+
+            - secretRef:
+                name: {{ .Values.backend.existingSecret }}
+
+          resources:
+            requests:
+              cpu: {{ .Values.backend.resources.requests.cpu }}
+              memory: {{ .Values.backend.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.backend.resources.limits.cpu }}
+              memory: {{ .Values.backend.resources.limits.memory }}
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
