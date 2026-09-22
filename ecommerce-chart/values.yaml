@@ -2,7 +2,7 @@ backend:
   existingSecret: backend-secret
   image:
     repository: ghcr.io/hzdevops52/e-backend
-    tag: f7b93ee
+    tag: df343dc
 
   replicaCount: 2
 
